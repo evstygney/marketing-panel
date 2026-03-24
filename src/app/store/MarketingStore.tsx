@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useReducer } from "react";
-import { Channel, ChannelMetricKey, Hypothesis, ProjectState } from "entities/types";
+import { Channel, ChannelMetricKey, DiagnosticThresholds, Hypothesis, ProjectState } from "entities/types";
 import { demoState, emptyState } from "shared/constants/defaults";
 import { clearProjectState, loadProjectState, saveProjectState } from "storage/localStorage/projectStorage";
 
@@ -7,6 +7,7 @@ type StateContextValue = {
   state: ProjectState;
   actions: {
     updateChannel: (period: "periodCurrent" | "periodPrevious", channelName: string, field: ChannelMetricKey, value: number) => void;
+    replacePeriodChannels: (period: "periodCurrent" | "periodPrevious", channels: Channel[]) => void;
     importState: (nextState: ProjectState) => void;
     resetState: () => void;
     loadDemoState: () => void;
@@ -14,18 +15,21 @@ type StateContextValue = {
     createHypothesis: (hypothesis: Hypothesis) => void;
     deleteHypothesis: (id: string) => void;
     completeOnboarding: () => void;
+    updateDiagnosticThreshold: <K extends keyof DiagnosticThresholds>(key: K, value: DiagnosticThresholds[K]) => void;
   };
 };
 
 type Action =
   | { type: "UPDATE_CHANNEL"; payload: { period: "periodCurrent" | "periodPrevious"; channelName: string; field: ChannelMetricKey; value: number } }
+  | { type: "REPLACE_PERIOD_CHANNELS"; payload: { period: "periodCurrent" | "periodPrevious"; channels: Channel[] } }
   | { type: "IMPORT_STATE"; payload: ProjectState }
   | { type: "RESET_STATE" }
   | { type: "LOAD_DEMO_STATE" }
   | { type: "UPDATE_HYPOTHESIS"; payload: Hypothesis }
   | { type: "CREATE_HYPOTHESIS"; payload: Hypothesis }
   | { type: "DELETE_HYPOTHESIS"; payload: string }
-  | { type: "COMPLETE_ONBOARDING" };
+  | { type: "COMPLETE_ONBOARDING" }
+  | { type: "UPDATE_DIAGNOSTIC_THRESHOLD"; payload: { key: keyof DiagnosticThresholds; value: number } };
 
 const MarketingStoreContext = createContext<StateContextValue | null>(null);
 
@@ -58,6 +62,11 @@ const reducer = (state: ProjectState, action: Action): ProjectState => {
       };
     case "IMPORT_STATE":
       return action.payload;
+    case "REPLACE_PERIOD_CHANNELS":
+      return {
+        ...state,
+        [action.payload.period]: action.payload.channels,
+      };
     case "RESET_STATE":
       return emptyState;
     case "LOAD_DEMO_STATE":
@@ -91,6 +100,17 @@ const reducer = (state: ProjectState, action: Action): ProjectState => {
           onboardingCompleted: true,
         },
       };
+    case "UPDATE_DIAGNOSTIC_THRESHOLD":
+      return {
+        ...state,
+        settings: {
+          ...state.settings,
+          diagnosticThresholds: {
+            ...state.settings.diagnosticThresholds,
+            [action.payload.key]: action.payload.value,
+          },
+        },
+      };
     default:
       return state;
   }
@@ -109,6 +129,8 @@ export const MarketingStoreProvider = ({ children }: { children: ReactNode }) =>
       actions: {
         updateChannel: (period, channelName, field, value) =>
           dispatch({ type: "UPDATE_CHANNEL", payload: { period, channelName, field, value } }),
+        replacePeriodChannels: (period, channels) =>
+          dispatch({ type: "REPLACE_PERIOD_CHANNELS", payload: { period, channels } }),
         importState: (nextState) => dispatch({ type: "IMPORT_STATE", payload: nextState }),
         resetState: () => {
           clearProjectState();
@@ -119,6 +141,8 @@ export const MarketingStoreProvider = ({ children }: { children: ReactNode }) =>
         createHypothesis: (hypothesis) => dispatch({ type: "CREATE_HYPOTHESIS", payload: hypothesis }),
         deleteHypothesis: (id) => dispatch({ type: "DELETE_HYPOTHESIS", payload: id }),
         completeOnboarding: () => dispatch({ type: "COMPLETE_ONBOARDING" }),
+        updateDiagnosticThreshold: (key, value) =>
+          dispatch({ type: "UPDATE_DIAGNOSTIC_THRESHOLD", payload: { key, value } }),
       },
     }),
     [state],

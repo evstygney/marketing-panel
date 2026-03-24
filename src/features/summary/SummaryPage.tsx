@@ -4,6 +4,8 @@ import { SectionHeading } from "shared/components/SectionHeading";
 import { formatCurrency, formatPercent } from "shared/utils/numbers";
 import { ChannelsTable } from "./components/ChannelsTable";
 import { KpiCards } from "./components/KpiCards";
+import { PasteChannelsCard } from "./components/PasteChannelsCard";
+import { parsePastedChannels } from "./logic/parsePastedChannels";
 import { getAggregateMetrics, getChannelMetrics } from "./logic/calculateMetrics";
 
 type Props = {
@@ -11,9 +13,18 @@ type Props = {
   previous: Channel[];
   onUpdateCurrent: (channelName: string, field: ChannelMetricKey, value: number) => void;
   onUpdatePrevious: (channelName: string, field: ChannelMetricKey, value: number) => void;
+  onReplaceCurrent: (channels: Channel[]) => void;
+  onReplacePrevious: (channels: Channel[]) => void;
 };
 
-export const SummaryPage = ({ current, previous, onUpdateCurrent, onUpdatePrevious }: Props) => {
+export const SummaryPage = ({
+  current,
+  previous,
+  onUpdateCurrent,
+  onUpdatePrevious,
+  onReplaceCurrent,
+  onReplacePrevious,
+}: Props) => {
   const currentMetrics = getChannelMetrics(current);
   const previousMetrics = getChannelMetrics(previous);
   const currentAggregate = getAggregateMetrics(current);
@@ -34,6 +45,11 @@ export const SummaryPage = ({ current, previous, onUpdateCurrent, onUpdatePrevio
             <div className="badge">ROAS: {currentAggregate.roas.toFixed(2)}</div>
           </div>
         </section>
+
+        <PasteChannelsCard
+          onApplyCurrent={(raw) => onReplaceCurrent(parsePastedChannels(raw))}
+          onApplyPrevious={(raw) => onReplacePrevious(parsePastedChannels(raw))}
+        />
 
         <ChannelsTable
           title="Текущий период"

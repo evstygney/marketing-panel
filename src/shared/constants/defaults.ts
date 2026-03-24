@@ -1,4 +1,4 @@
-import { Channel, ProjectState } from "entities/types";
+import { Channel, DiagnosticThresholds, ProjectState } from "entities/types";
 import { DEFAULT_CHANNELS } from "./channels";
 
 const createEmptyChannel = (name: string): Channel => ({
@@ -12,6 +12,19 @@ const createEmptyChannel = (name: string): Channel => ({
 });
 
 export const createEmptyChannels = (): Channel[] => DEFAULT_CHANNELS.map(createEmptyChannel);
+
+export const defaultDiagnosticThresholds: DiagnosticThresholds = {
+  ctrDropPercent: 10,
+  cpcGrowthPercent: 10,
+  minClicksForLandingIssue: 100,
+  clickToLeadThreshold: 0.03,
+  minLeadsForSalesIssue: 30,
+  leadToSaleThreshold: 0.12,
+  paybackGapPercent: 10,
+  highRevenueShareThreshold: 0.14,
+  lowBudgetShareThreshold: 0.08,
+  highCostShareThreshold: 0.15,
+};
 
 export const demoState: ProjectState = {
   periodCurrent: [
@@ -70,6 +83,7 @@ export const demoState: ProjectState = {
   settings: {
     onboardingCompleted: false,
     demoMode: true,
+    diagnosticThresholds: defaultDiagnosticThresholds,
   },
 };
 
@@ -80,5 +94,6 @@ export const emptyState: ProjectState = {
   settings: {
     onboardingCompleted: false,
     demoMode: false,
+    diagnosticThresholds: defaultDiagnosticThresholds,
   },
 };

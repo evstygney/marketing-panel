@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { ProjectState } from "entities/types";
+import { DiagnosticItem } from "features/diagnostics/logic/rulesEngine";
 import { DiagnosticsPage } from "features/diagnostics/DiagnosticsPage";
 import { HypothesesPage } from "features/hypotheses/HypothesesPage";
 import { ReportsPage } from "features/reports/ReportsPage";
@@ -46,6 +47,18 @@ const createHypothesisDraft = () => ({
   priority: 1.5,
   status: "new" as const,
   comment: "",
+  deadline: "",
+});
+
+const createHypothesisFromDiagnostic = (item: DiagnosticItem) => ({
+  id: crypto.randomUUID(),
+  title: item.hypothesisTitle,
+  channel: item.channel,
+  impact: item.type === "critical" ? 5 : item.type === "growth" ? 4 : 3,
+  effort: item.type === "growth" ? 2 : 3,
+  priority: item.type === "growth" ? 2 : item.type === "critical" ? 1.67 : 1,
+  status: "new" as const,
+  comment: `${item.message} ${item.recommendation}`,
   deadline: "",
 });
 
@@ -124,12 +137,28 @@ const AppContent = () => {
             onUpdatePrevious={(channelName, field, value) =>
               actions.updateChannel("periodPrevious", channelName, field, value)
             }
+            onReplaceCurrent={(channels) => actions.replacePeriodChannels("periodCurrent", channels)}
+            onReplacePrevious={(channels) => actions.replacePeriodChannels("periodPrevious", channels)}
           />
         );
       case routes.diagnostics:
-        return <DiagnosticsPage current={state.periodCurrent} previous={state.periodPrevious} />;
+        return (
+          <DiagnosticsPage
+            current={state.periodCurrent}
+            previous={state.periodPrevious}
+            thresholds={state.settings.diagnosticThresholds}
+            onThresholdChange={actions.updateDiagnosticThreshold}
+            onCreateHypothesis={(item) => actions.createHypothesis(createHypothesisFromDiagnostic(item))}
+          />
+        );
       case routes.reports:
-        return <ReportsPage current={state.periodCurrent} previous={state.periodPrevious} />;
+        return (
+          <ReportsPage
+            current={state.periodCurrent}
+            previous={state.periodPrevious}
+            thresholds={state.settings.diagnosticThresholds}
+          />
+        );
       case routes.utm:
         return <UtmPage />;
       case routes.hypotheses:

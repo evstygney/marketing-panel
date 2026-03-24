@@ -344,6 +344,12 @@ td select,
   gap: 14px;
 }
 
+.field-grid .field,
+.field-grid input,
+.field-grid select {
+  min-width: 0;
+}
+
 .field-group {
   display: grid;
   gap: 8px;

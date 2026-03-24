@@ -28,9 +28,23 @@ export type ProjectData = {
   hypotheses: Hypothesis[];
 };
 
+export type DiagnosticThresholds = {
+  ctrDropPercent: number;
+  cpcGrowthPercent: number;
+  minClicksForLandingIssue: number;
+  clickToLeadThreshold: number;
+  minLeadsForSalesIssue: number;
+  leadToSaleThreshold: number;
+  paybackGapPercent: number;
+  highRevenueShareThreshold: number;
+  lowBudgetShareThreshold: number;
+  highCostShareThreshold: number;
+};
+
 export type ProjectSettings = {
   onboardingCompleted: boolean;
   demoMode: boolean;
+  diagnosticThresholds: DiagnosticThresholds;
 };
 
 export type ProjectState = ProjectData & {

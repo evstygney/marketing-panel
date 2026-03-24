@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Channel } from "entities/types";
+import { Channel, DiagnosticThresholds } from "entities/types";
 import { Button } from "shared/components/Button";
 import { PageIntro } from "shared/components/PageIntro";
 import { downloadTextFile } from "shared/utils/download";
@@ -9,12 +9,13 @@ import { generateReport, reportToText } from "./logic/generateReport";
 type Props = {
   current: Channel[];
   previous: Channel[];
+  thresholds: DiagnosticThresholds;
 };
 
-export const ReportsPage = ({ current, previous }: Props) => {
-  const [report, setReport] = useState(() => generateReport(current, previous));
+export const ReportsPage = ({ current, previous, thresholds }: Props) => {
+  const [report, setReport] = useState(() => generateReport(current, previous, thresholds));
 
-  const rebuildReport = () => setReport(generateReport(current, previous));
+  const rebuildReport = () => setReport(generateReport(current, previous, thresholds));
   const text = reportToText(report);
 
   return (

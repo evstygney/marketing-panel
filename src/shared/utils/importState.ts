@@ -1,5 +1,5 @@
 import { ProjectState, Channel, Hypothesis, HypothesisStatus } from "entities/types";
-import { createEmptyChannels, emptyState } from "shared/constants/defaults";
+import { createEmptyChannels, defaultDiagnosticThresholds, emptyState } from "shared/constants/defaults";
 
 const parseCsvLine = (line: string): string[] => {
   const values: string[] = [];
@@ -63,6 +63,10 @@ export const normalizeImportedState = (value: Partial<ProjectState>): ProjectSta
   settings: {
     ...emptyState.settings,
     ...value.settings,
+    diagnosticThresholds: {
+      ...defaultDiagnosticThresholds,
+      ...value.settings?.diagnosticThresholds,
+    },
     onboardingCompleted: true,
   },
 });
