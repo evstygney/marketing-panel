@@ -9,6 +9,7 @@ import { Button } from "shared/components/Button";
 import { useHashRoute } from "shared/hooks/useHashRoute";
 import { projectToCsv } from "shared/utils/csv";
 import { downloadTextFile } from "shared/utils/download";
+import { normalizeImportedState, parseCsvState, parseJsonState } from "shared/utils/importState";
 import { MainLayout } from "./layout/MainLayout";
 import { AppRoute, routes } from "./routes";
 import { MarketingStoreProvider, useMarketingStore } from "./store/MarketingStore";
@@ -46,14 +47,6 @@ const createHypothesisDraft = () => ({
   status: "new" as const,
   comment: "",
   deadline: "",
-});
-
-const normalizeImportedState = (value: ProjectState): ProjectState => ({
-  ...value,
-  hypotheses: value.hypotheses.map((item) => ({
-    ...item,
-    priority: item.effort > 0 ? item.impact / item.effort : 0,
-  })),
 });
 
 const Onboarding = ({
@@ -108,13 +101,15 @@ const Onboarding = ({
 const AppContent = () => {
   const { route, navigate } = useHashRoute();
   const { state, actions } = useMarketingStore();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const jsonInputRef = useRef<HTMLInputElement | null>(null);
+  const csvInputRef = useRef<HTMLInputElement | null>(null);
   const header = titles[route];
 
   const exportJson = () =>
     downloadTextFile("marketing-dashboard.json", JSON.stringify(state, null, 2), "application/json");
   const exportCsv = () => downloadTextFile("marketing-dashboard.csv", projectToCsv(state), "text/csv;charset=utf-8");
-  const importJson = () => fileInputRef.current?.click();
+  const importJson = () => jsonInputRef.current?.click();
+  const importCsv = () => csvInputRef.current?.click();
 
   const renderPage = () => {
     switch (route) {
@@ -172,7 +167,7 @@ const AppContent = () => {
       ) : null}
 
       <input
-        ref={fileInputRef}
+        ref={jsonInputRef}
         type="file"
         accept="application/json"
         hidden
@@ -183,8 +178,25 @@ const AppContent = () => {
           }
 
           const raw = await file.text();
-          const parsed = JSON.parse(raw) as ProjectState;
-          actions.importState(normalizeImportedState(parsed));
+          actions.importState(parseJsonState(raw));
+          actions.completeOnboarding();
+          event.target.value = "";
+        }}
+      />
+
+      <input
+        ref={csvInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        hidden
+        onChange={async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) {
+            return;
+          }
+
+          const raw = await file.text();
+          actions.importState(parseCsvState(raw));
           actions.completeOnboarding();
           event.target.value = "";
         }}
@@ -198,6 +210,7 @@ const AppContent = () => {
         onExportJson={exportJson}
         onExportCsv={exportCsv}
         onImportJson={importJson}
+        onImportCsv={importCsv}
         onLoadDemo={() => actions.loadDemoState()}
         onReset={() => actions.resetState()}
       >

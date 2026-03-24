@@ -11,6 +11,7 @@ type Props = {
   onExportJson: () => void;
   onExportCsv: () => void;
   onImportJson: () => void;
+  onImportCsv: () => void;
   onLoadDemo: () => void;
   onReset: () => void;
   children: ReactNode;
@@ -24,6 +25,7 @@ export const MainLayout = ({
   onExportJson,
   onExportCsv,
   onImportJson,
+  onImportCsv,
   onLoadDemo,
   onReset,
   children,
@@ -37,6 +39,7 @@ export const MainLayout = ({
         onExportJson={onExportJson}
         onExportCsv={onExportCsv}
         onImportJson={onImportJson}
+        onImportCsv={onImportCsv}
         onLoadDemo={onLoadDemo}
         onReset={onReset}
       />

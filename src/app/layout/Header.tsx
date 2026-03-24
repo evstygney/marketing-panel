@@ -6,6 +6,7 @@ type Props = {
   onExportJson: () => void;
   onExportCsv: () => void;
   onImportJson: () => void;
+  onImportCsv: () => void;
   onLoadDemo: () => void;
   onReset: () => void;
 };
@@ -16,6 +17,7 @@ export const Header = ({
   onExportJson,
   onExportCsv,
   onImportJson,
+  onImportCsv,
   onLoadDemo,
   onReset,
 }: Props) => (
@@ -31,6 +33,9 @@ export const Header = ({
       </Button>
       <Button variant="ghost" onClick={onImportJson}>
         Импорт JSON
+      </Button>
+      <Button variant="ghost" onClick={onImportCsv}>
+        Импорт CSV
       </Button>
       <Button variant="ghost" onClick={onExportJson}>
         Экспорт JSON
